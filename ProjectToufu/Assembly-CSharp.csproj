@@ -6,7 +6,7 @@
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <RootNamespace></RootNamespace>
-    <ProjectGuid>{06B5CFEB-DDE9-AEF2-A51F-205A2C43F83B}</ProjectGuid>
+    <ProjectGuid>{FF450F1B-1257-EFB4-893C-8AE315CEF2A4}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>Assembly-CSharp</AssemblyName>
@@ -58,8 +58,10 @@
      <Compile Include="Assets\Level Scene\Script\Enemy Script\Enemy3.cs" />
      <Compile Include="Assets\Level Scene\Script\Enemy Script\Enemy3_2.cs" />
      <Compile Include="Assets\Level Scene\Script\Enemy Script\InjuresPlayer.cs" />
+     <Compile Include="Assets\Level Scene\Script\Enemy Script\MultiShotEnemy.cs" />
      <Compile Include="Assets\Level Scene\Script\Enemy Script\SwarmBoss.cs" />
      <Compile Include="Assets\Level Scene\Script\Enemy Script\SwarmBossInfluence.cs" />
+     <Compile Include="Assets\Level Scene\Script\Enemy Script\TankSpikeBoss.cs" />
      <Compile Include="Assets\Level Scene\Script\Enemy Script\TurrentHeadMover.cs" />
      <Compile Include="Assets\Level Scene\Script\Enemy Script\Turret1AI.cs" />
      <Compile Include="Assets\Level Scene\Script\Enemy Script\TurretHead2.cs" />
@@ -86,6 +88,9 @@
      <Compile Include="Assets\MapScene\Scripts\LevelControllerMap.cs" />
      <Compile Include="Assets\MapScene\Scripts\TypingScript.cs" />
      <Compile Include="Assets\NEW STUFF\SpeedBoat.cs" />
+     <None Include="Assets\Plugins\GitHub\Editor\CREDITS.txt" />
+     <None Include="Assets\Free Particle Pack\Standard Assets\ParticleSystems\ParticleSystemsGuidelines.txt" />
+     <None Include="Assets\Plugins\GitHub\Editor\EULA.txt" />
  <Reference Include="UnityEngine.UI">
  <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>
