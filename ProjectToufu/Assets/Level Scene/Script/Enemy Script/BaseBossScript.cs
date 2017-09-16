@@ -7,21 +7,20 @@ public class BaseBossScript : MonoBehaviour {
     private HUDFacade HUD;
 
     public string title;
-	// Use this for initialization
-	void Start () {
-        HUD = HUDFacade.HUDfacade;
-	}
 	
 	// Update is called once per frame
 	void Update () {
 		
 	}
 
+    //Starts coroutine that waits until singleton HUDFacade is done 
     public void InitiateHUD()
     {
-        HUD.BossInfoScript.enabled = true;
+        HUD = HUDFacade.HUDfacade;
+        HUD.BossInfoScript.gameObject.SetActive(true);
         SetHealth(1);
         SetTitle(title);
+
     }
 
     public void SetHealth(float health)

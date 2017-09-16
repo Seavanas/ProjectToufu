@@ -5,17 +5,18 @@ using UnityEngine;
 public class SwarmBoss : MonoBehaviour {
 
     public SwarmBossInfluence InfluenceScript;
-
+    public BaseBossScript BaseBossScript;
+    public BaseEnemyScript BaseEnemyScript;
 	// Use this for initialization
 	void Start () {
-        //test
-	}
+        BaseBossScript.InitiateHUD();
+    }
 	
+    
 	// Update is called once per frame
 	void Update () {
         SetRadius();
-        
-	}
+    }
 
 
     //Sets orbiting radius for the swarm

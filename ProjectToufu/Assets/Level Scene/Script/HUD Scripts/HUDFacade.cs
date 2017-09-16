@@ -10,7 +10,7 @@ public class HUDFacade : MonoBehaviour {
     public BossInfoScript BossInfoScript;
 
 
-    void Start()
+    void Awake()
     {
         if (HUDfacade == null)
         {
