@@ -1,10 +1,33 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class HUDFacade : MonoBehaviour {
 
     public GameObject ScoreText, LivesText, HealthBar;
+    public static HUDFacade HUDfacade;
+    public BossInfoScript BossInfoScript;
+
+
+    void Start()
+    {
+        if (HUDfacade == null)
+        {
+            HUDfacade = this;
+        }
+        else Destroy(this.gameObject);
+    }
+
+    public void SetBossName(string name)
+    {
+        BossInfoScript.BossTitle.text = name;
+    }
+
+    public void SetBossHealth(float health)
+    {
+        BossInfoScript.BossHealthbar.fillAmount = health;
+    }
 
     public void SetScore(float newscore)
     {
