@@ -12,12 +12,14 @@ public class BaseEnemyScript : MonoBehaviour {
      */
 
     public float health, score;
+    private float maxHealth;
     private HUDFacade scoreBoard;
 
     void Start()
     {
         GameObject scoreObject = GameObject.FindWithTag("Hud");
         scoreBoard = scoreObject.GetComponent<HUDFacade>();
+        maxHealth = health;
     }
     
 
@@ -39,4 +41,8 @@ public class BaseEnemyScript : MonoBehaviour {
         scoreBoard.AddScore(score);
     }
 
+    public float GetMaxHealth()
+    {
+        return maxHealth;
+    }
 }
