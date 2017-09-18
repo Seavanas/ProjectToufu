@@ -25,6 +25,7 @@ public class SwarmBossInfluence : MonoBehaviour
 
     void FixedUpdate()
     {
+        print(Vector2.SignedAngle(new Vector2(0,-1), GameObject.FindGameObjectWithTag("Player").transform.position - transform.position));
 
         List<OrbitingEnemy> NullObjects = new List<OrbitingEnemy>();
         foreach (OrbitingEnemy EnemySwarm1 in EnemySwarm)
@@ -43,7 +44,9 @@ public class SwarmBossInfluence : MonoBehaviour
         if (TimeBeforeAttacking < Time.time)
         {
             TimeBeforeAttacking = Time.time + Random.Range(0.2f,3);
-            NonOrbitingEnemies = SendWave(30 + 5*((int)Random.Range(0,8)), (int)Random.Range(3,7));
+            //float AngleToPlayer = (GameObject.FindGameObjectWithTag("Player").transform.position - transform.position) - 180;
+            
+            //NonOrbitingEnemies = SendWave(30 + 5*((int)Random.Range(0,8)), (int)Random.Range(3,7), );
         }
 
         foreach (PositionAngleBeforePoint enemy in NonOrbitingEnemies)
@@ -228,7 +231,7 @@ public class SwarmBossInfluence : MonoBehaviour
         return (angle1+360)%360;
     }
 
-    List<PositionAngleBeforePoint> SendWave(float MaxAngle, float NumberOfShips)
+    List<PositionAngleBeforePoint> SendWave(float MaxAngle, float NumberOfShips, float AngleOffsetCCW)
     {
         List<PositionAngleBeforePoint> Send = new List<PositionAngleBeforePoint>();
         float CurrentAngle = MaxAngle;
@@ -242,7 +245,7 @@ public class SwarmBossInfluence : MonoBehaviour
             }
             if (enemiesInRange.Count != 0)
             {
-                GameObject FoundShip = FindClosestAngle(CurrentAngle, enemiesInRange);
+                GameObject FoundShip = FindClosestAngle(CurrentAngle + AngleOffsetCCW, enemiesInRange);
                 bool CW;
 
                 Vector2 AddTo = DegreesToVector2(FoundShip.transform.rotation.eulerAngles.z + 45), AddTo2 = DegreesToVector2(FoundShip.transform.rotation.eulerAngles.z - 45);
@@ -251,7 +254,7 @@ public class SwarmBossInfluence : MonoBehaviour
                     CW = false;
                 }
                 else CW = true;
-                Send.Add(new PositionAngleBeforePoint(FoundShip, gameObject, (CurrentAngle + 180) % 360, CW));
+                Send.Add(new PositionAngleBeforePoint(FoundShip, gameObject, (CurrentAngle + 180 + AngleOffsetCCW) % 360, CW));
 
                 foreach (OrbitingEnemy enemy1 in EnemySwarm)
                 {

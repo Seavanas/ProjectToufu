@@ -51,6 +51,7 @@
      <Compile Include="Assets\Health.cs" />
      <Compile Include="Assets\Level Scene\Script\BackgroundScript.cs" />
      <Compile Include="Assets\Level Scene\Script\Enemy Script\AgileEnemy.cs" />
+     <Compile Include="Assets\Level Scene\Script\Enemy Script\BaseBossScript.cs" />
      <Compile Include="Assets\Level Scene\Script\Enemy Script\BaseEnemyScript.cs" />
      <Compile Include="Assets\Level Scene\Script\Enemy Script\DoubleShotEnemy.cs" />
      <Compile Include="Assets\Level Scene\Script\Enemy Script\Enemy1Script.cs" />
@@ -72,6 +73,7 @@
      <Compile Include="Assets\Level Scene\Script\Game State Script\L1LevelComplete.cs" />
      <Compile Include="Assets\Level Scene\Script\Game State Script\LevelController.cs" />
      <Compile Include="Assets\Level Scene\Script\GameOverScript.cs" />
+     <Compile Include="Assets\Level Scene\Script\HUD Scripts\BossInfoScript.cs" />
      <Compile Include="Assets\Level Scene\Script\HUD Scripts\HUDFacade.cs" />
      <Compile Include="Assets\Level Scene\Script\HUD Scripts\LivesScript.cs" />
      <Compile Include="Assets\Level Scene\Script\HUD Scripts\ScoreScript.cs" />

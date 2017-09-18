@@ -30,7 +30,6 @@ public class CameraScript : MonoBehaviour {
             {
                 if (Mathf.Abs((PlayerObject.transform.position - Camera).x) > 0)
                 {
-                    print("TEST");
                     float slope = (PlayerObject.transform.position - Camera).y / ((PlayerObject.transform.position - Camera).x);
                     //float b = Camera.y - slope * Camera.x;
                     Vector2 Option1 = (new Vector2(0.1f, (slope * 0.1f))).normalized;
