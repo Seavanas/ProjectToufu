@@ -13,6 +13,7 @@ public class BasePlayerScript : MonoBehaviour {
     {
         HUD = GameObject.FindGameObjectWithTag("Hud").GetComponent<HUDFacade>();
         maxHealth = health;
+        UpdateHealth();
     }
     
     public void TakeDamage(float damage)
