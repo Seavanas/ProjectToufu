@@ -66,12 +66,17 @@ public class EnemySpawnController : MonoBehaviour
         for (int i = 0; i < enemySpawns.transform.childCount; i++)       //Adding each wave into the list
             enemyWaves.Add(enemySpawns.transform.GetChild(i));
 
-        for (int i = 0; i < enemyWaves.Count; i++)       //Deactivate all the waves
+        for (int i = 0; i < enemyWaves.Count; i++)       //Loop waves
         {
-            for (int j = 0; j < enemyWaves[i].childCount; j++)
-                enemyWaves[i].GetChild(j).gameObject.SetActive(false);      //Deactivate all the groups in each wave
+            for (int j = 0; j < enemyWaves[i].childCount; j++)      //Loop groups
+            { 
+                for (int k = 0; k < enemyWaves[i].GetChild(j).childCount; k++)      //Loop individual enemy
+                    enemyWaves[i].GetChild(j).GetChild(k).gameObject.SetActive(false);      //Deactivate all the enemy in each group
 
-            enemyWaves[i].gameObject.SetActive(false);
+                enemyWaves[i].GetChild(j).gameObject.SetActive(false);      //Deactivate all the groups, maybe this improves performance?
+            }
+
+            enemyWaves[i].gameObject.SetActive(false);      //Deactivate all the waves
         } 
     }
 
@@ -89,21 +94,34 @@ public class EnemySpawnController : MonoBehaviour
 
             for (int j = 0; j < enemyWaves[i].childCount; j++)      //Go through the child list of wave (chlid list = "Group" in unity)
             {
+                enemyWaves[i].GetChild(j).gameObject.SetActive(true);       //Activate the group
+
                 Transform enemyGroup = enemyWaves[i].GetChild(j);
                 float yEnemySpawns = enemySpawns.transform.position.y;
                 float yGroup = enemyGroup.position.y;
                 float groupWait = enemyGroup.transform.localPosition.z;
 
+                enemyWaves[i].GetChild(j).position = new Vector2(enemyGroup.position.x, yEnemySpawns);      //Set the spawn point for the group
+
                 if (groupWait != 0)      //Using the z values of each group to get the second waited before group starts
                     yield return new WaitForSeconds(groupWait);
-                
-                enemyWaves[i].GetChild(j).position = new Vector2(enemyGroup.position.x, yEnemySpawns);      //Set the spawn point
-                enemyWaves[i].GetChild(j).gameObject.SetActive(true);       //Activate the groups in the wave
 
-                if (defeat)   //Check if player is out of lives
-                    break;
+                List<Transform> enemyList = new List<Transform>();          //Next 3 lines prevent error due to k-th enemy not reachable because list size changes
+                for (int k = 0; k < enemyGroup.childCount; k++)
+                    enemyList.Add(enemyWaves[i].GetChild(j).GetChild(k));
+
+                for (int k = 0; k < enemyList.Count; k++)
+                {
+                    if (enemyList[k].localPosition.z != 0)      //Using the z values of each enemy to get the second waited before enemy starts spawning
+                        yield return new WaitForSeconds(enemyList[k].localPosition.z);
+
+                    enemyList[k].gameObject.SetActive(true);       //Activate the enemy in the group
+
+                    if (defeat)   //Check if player is out of lives
+                        break;
+                }
             }
-            yield return new WaitUntil(() => (GameObject.FindGameObjectWithTag("Enemy") == null));
+            yield return new WaitUntil(() => (GameObject.FindGameObjectWithTag("Enemy") == null));      //Wave starts only if the previous wave has complete, meanning enemies are dead
         }
         waveEndsEventHandler(this, new EventArgs());            //Needs a few second for the event to register from levelcomplete script
         yield break;
