@@ -9,23 +9,26 @@ public class SwarmBossInfluence : MonoBehaviour
     /// <summary>
     /// Controls enemies that are inside the Circle of influence, such as attacks, organization, and movement
     /// </summary>
+
+    public float NumberOfShips;
     public SwarmBoss SwarmBossScript;
     //public List<GameObject> EnemySwarm;
     public List<OrbitingEnemy> EnemySwarm;
     public bool StartFight = false;
     public float EnemyTurnAnglePerFrame, minimumRadius, EnemySpeed;
     List<PositionAngleBeforePoint> NonOrbitingEnemies;
-    float TimeBeforeAttacking = 6;
+    List<PositionAngleBeforePoint> PlayerChargingEnemies;
+    float TimeBeforeAttacking = 4;
     void Start()
     {
         EnemySwarm = new List<OrbitingEnemy>();
         NonOrbitingEnemies = new List<PositionAngleBeforePoint>();
+        PlayerChargingEnemies = new List<PositionAngleBeforePoint>();
         TimeBeforeAttacking += Time.time;
     }
 
     void FixedUpdate()
     {
-        print(Vector2.SignedAngle(new Vector2(0,-1), GameObject.FindGameObjectWithTag("Player").transform.position - transform.position));
 
         List<OrbitingEnemy> NullObjects = new List<OrbitingEnemy>();
         foreach (OrbitingEnemy EnemySwarm1 in EnemySwarm)
@@ -40,110 +43,211 @@ public class SwarmBossInfluence : MonoBehaviour
         {
             EnemySwarm.Remove(nullObj);
         }
+        NumberOfShips = EnemySwarm.Count;
 
-        if (TimeBeforeAttacking < Time.time)
-        {
-            TimeBeforeAttacking = Time.time + Random.Range(0.2f,3);
-            //float AngleToPlayer = (GameObject.FindGameObjectWithTag("Player").transform.position - transform.position) - 180;
-            
-            //NonOrbitingEnemies = SendWave(30 + 5*((int)Random.Range(0,8)), (int)Random.Range(3,7), );
-        }
+        NonOrbitingEnemies = DeleteNull(NonOrbitingEnemies);
+        PlayerChargingEnemies = DeleteNull(PlayerChargingEnemies);
+
 
         foreach (PositionAngleBeforePoint enemy in NonOrbitingEnemies)
         {
+            ControlWave(enemy);
+        }
 
-            if (enemy.enemy != null)
+        foreach (PositionAngleBeforePoint enemy in PlayerChargingEnemies)
+        {
+            ControlChargeAttack(enemy);
+        }
+
+
+
+
+
+
+
+        if (TimeBeforeAttacking < Time.time)
+        {
+            TimeBeforeAttacking = Time.time + Random.Range(3, 3);
+            SendEnemiesAtPlayer(3, 0);
+            SendWave(30 + 5 * ((int)Random.Range(0, 8)), (int)Random.Range(3, 7));
+        }
+
+    }
+
+    void ControlChargeAttack(PositionAngleBeforePoint enemy)
+    {
+        float distanceBetweenEnemy = Vector2.Distance(enemy.enemy.transform.position, transform.position);
+        Rigidbody2D enemyRB = enemy.enemy.GetComponent<Rigidbody2D>();
+        if (!enemy.StartedSlowing)
+        {
+            if (distanceBetweenEnemy > 1.4f)
             {
-                //If desired angle to achieve is greater than 45 degrees away from current angle, then rotate towards the boss
-                if (!enemy.TriggerOnceOnly && Mathf.Min(Mathf.Abs(enemy.enemy.transform.rotation.eulerAngles.z - enemy.angle), Mathf.Abs(enemy.enemy.transform.rotation.eulerAngles.z - enemy.angle - 360), Mathf.Abs(enemy.enemy.transform.rotation.eulerAngles.z - enemy.angle + 360)) > 12)
-                {
-                    //Debug.Log(Mathf.Min(Mathf.Abs(enemy.enemy.transform.rotation.eulerAngles.z - enemy.angle), Mathf.Abs(enemy.enemy.transform.rotation.eulerAngles.z - enemy.angle - 360), Mathf.Abs(enemy.enemy.transform.rotation.eulerAngles.z - enemy.angle + 360)));
-                    if (enemy.CW)
-                    {
-                        if (enemy.enemy.transform.rotation.eulerAngles.z < enemy.angle)
-                        {
-                            enemy.enemy.transform.rotation = Quaternion.Euler(0, 0, Mathf.Clamp(enemy.angle, enemy.enemy.transform.rotation.eulerAngles.z + 360 - EnemyTurnAnglePerFrame, enemy.enemy.transform.rotation.eulerAngles.z + 360));
-                        }
-                        else
-                            enemy.enemy.transform.rotation = Quaternion.Euler(0, 0, Mathf.Clamp(enemy.angle, enemy.enemy.transform.rotation.eulerAngles.z - EnemyTurnAnglePerFrame, enemy.enemy.transform.rotation.eulerAngles.z));
-                    }
-                    else
-                    {
-                        if (enemy.enemy.transform.rotation.eulerAngles.z >= enemy.angle)
-                        {
-                            enemy.enemy.transform.rotation = Quaternion.Euler(0, 0, Mathf.Clamp(enemy.angle + 360, enemy.enemy.transform.rotation.eulerAngles.z, enemy.enemy.transform.rotation.eulerAngles.z + EnemyTurnAnglePerFrame));
-                        }
-                        else
-                            enemy.enemy.transform.rotation = Quaternion.Euler(0, 0, Mathf.Clamp(enemy.angle, enemy.enemy.transform.rotation.eulerAngles.z, enemy.enemy.transform.rotation.eulerAngles.z + EnemyTurnAnglePerFrame));
-                    }
-                }
-
-                else
-                {
-                    enemy.TriggerOnceOnly = true;
-                    //Calculates perpendicular line from angle at boss position, where slope is desired angle of enemy
-                    int test = 0;
-                    float Range = 0.02f*EnemySpeed;
-                    //Equation of line, y = mx+b
-                    do
-                    {
-                        Vector2 firstPos, secondPos;
-                        if (enemy.angle != 0 && enemy.angle != 180)
-                        {
-                            float m = (Mathf.Tan((enemy.angle + 270) * Mathf.PI / 180));
-                            float b = (enemy.endPosition.transform.position.y) - m * (enemy.endPosition.transform.position.x);
-                            float a1 = (m * m + 1), b1 = 2 * (b - enemy.enemy.transform.position.y) * m - 2 * enemy.enemy.transform.position.x, c1 = Mathf.Pow((b - enemy.enemy.transform.position.y), 2) - (Range) * (Range) - Mathf.Pow(enemy.enemy.transform.position.x, 2);
-                            float firstX = (-b1 + Mathf.Sqrt(b1 * b1 - 4 * a1 * c1)) / (2 * a1), secondX = (-b1 - Mathf.Sqrt(b1 * b1 - 4 * a1 * c1)) / (2 * a1);
-                            //The x coordinates mark where the line going through boss intersects with a circle depicting where enemy can travel
-                            firstPos = new Vector2(firstX, firstX * m + b);
-                            secondPos = new Vector2(secondX, secondX * m + b);
-                        }
-                        else
-                        {
-                            float x = enemy.endPosition.transform.position.x;
-                            float a1 = 1, b1 = -2 * enemy.enemy.transform.position.y, c1 = Mathf.Pow(enemy.enemy.transform.position.y, 2) - (Range * Range) + Mathf.Pow(x - enemy.enemy.transform.position.x, 2);
-                            float firstY = (-b1 + Mathf.Sqrt(b1 * b1 - 4 * a1 * c1)) / (2 * a1), secondY = (-b1 - Mathf.Sqrt(b1 * b1 - 4 * a1 * c1)) / (2 * a1);
-                            firstPos = new Vector2(x, firstY);
-                            secondPos = new Vector2(x, secondY);
-                        }
-
-                        float angle1 = Vector2ToDegrees(firstPos - (Vector2)enemy.enemy.transform.position), angle2 = Vector2ToDegrees(secondPos - (Vector2)enemy.enemy.transform.position);
-                        if ((angle1 >= 0 || angle1 < 0) && (angle2 >= 0 || angle2 < 0))
-                        {
-                            if (Mathf.Min(Mathf.Abs(enemy.enemy.transform.rotation.eulerAngles.z - angle1), Mathf.Abs(enemy.enemy.transform.rotation.eulerAngles.z - (angle1 + 360)), Mathf.Abs(enemy.enemy.transform.rotation.eulerAngles.z - (angle1 - 360))) < Mathf.Min(Mathf.Abs(enemy.enemy.transform.rotation.eulerAngles.z - angle2), Mathf.Abs(enemy.enemy.transform.rotation.eulerAngles.z - (angle2 + 360)), Mathf.Abs(enemy.enemy.transform.rotation.eulerAngles.z - (angle2 - 360))))
-                            {
-                                enemy.enemy.transform.rotation = Quaternion.Euler(0, 0, ClampAngle(angle1, enemy.enemy.transform.rotation.eulerAngles.z, EnemyTurnAnglePerFrame*2));
-                            }
-                            else
-                            {
-                                enemy.enemy.transform.rotation = Quaternion.Euler(0, 0, ClampAngle(angle2, enemy.enemy.transform.rotation.eulerAngles.z, EnemyTurnAnglePerFrame*2));
-                            }
-                            break;
-                        }
-                        Range += 0.1f;
-                        test++;
-                        if (test >= 1000)
-                        {
-                            Debug.Log("FUCK");
-                            break;
-                        }
-                    } while (true);
-                    
-                }
-                enemy.enemy.GetComponent<Rigidbody2D>().velocity = enemy.enemy.transform.up * EnemySpeed;
+                enemy.StartedSlowing = true;
             }
         }
+        else
+        {
+            if (enemyRB.velocity.magnitude > 4 && !enemy.StartedTurning)
+            {
+                enemyRB.velocity = enemy.enemy.GetComponent<Rigidbody2D>().velocity * 0.96f;
+                print("1");
+            }
+            else if (!enemy.TriggerOnceOnly)
+            {
+                float CurrentVelocityMag = enemyRB.velocity.magnitude;
+                ControlWave(enemy);
+                enemyRB.velocity = enemyRB.velocity.normalized;
+                enemyRB.velocity *= CurrentVelocityMag;
+                print("2");
+
+            }
+            else
+            {
+                float CurrentVelocityMag = enemyRB.velocity.magnitude;
+                ControlWave(enemy);
+                enemyRB.velocity = enemyRB.velocity.normalized;
+                enemyRB.velocity *= CurrentVelocityMag * 1.06f;
+            }
+        }
+        
+    }
+
+
+    List<PositionAngleBeforePoint> DeleteNull(List<PositionAngleBeforePoint> MyList)
+    {
+        
+        List<PositionAngleBeforePoint> NullObjects = new List<PositionAngleBeforePoint>();
+        foreach (PositionAngleBeforePoint object1 in MyList)
+        {
+            if (object1.enemy == (null))
+            {
+                NullObjects.Add(object1);
+            }
+        }
+        foreach (PositionAngleBeforePoint nullObject in NullObjects)
+        {
+            MyList.Remove(nullObject);
+        }
+        return MyList;
+
+
+    }
+    public void SendEnemiesAtPlayer(int NumberOfShips, float MaxSpread)
+    {
+
+        GameObject PlayerRef = GameObject.FindGameObjectWithTag("Player");
+        if (PlayerRef == null)
+        {
+            return;
+        }
+        float angleFromBossToPlayer = (Vector2.SignedAngle(new Vector2(0, 1), PlayerRef.transform.position - transform.position) + 180) % 360;
+        for (int i = 0; i < NumberOfShips; i++)
+        {
+            PlayerChargingEnemies = AddAttackingShip(PlayerChargingEnemies, angleFromBossToPlayer);
+        }
+        
 
 
     }
 
 
+
+    //First rotates enemy towards its enemy.angle if the enemy.triggerOnceOnly is false, then if the angle is the desired angle, then starts following the line
+    //with the angle enemy.angle through the enemy.endposition
+    void ControlWave(PositionAngleBeforePoint enemy)
+    {
+        enemy.StartedTurning = true;
+        //If desired angle to achieve is greater than 45 degrees away from current angle, then rotate towards the boss
+        if (!enemy.TriggerOnceOnly && Mathf.Min(Mathf.Abs(enemy.enemy.transform.rotation.eulerAngles.z - enemy.angle), Mathf.Abs(enemy.enemy.transform.rotation.eulerAngles.z - enemy.angle - 360), Mathf.Abs(enemy.enemy.transform.rotation.eulerAngles.z - enemy.angle + 360)) > 45)
+        {
+            //Debug.Log(Mathf.Min(Mathf.Abs(enemy.enemy.transform.rotation.eulerAngles.z - enemy.angle), Mathf.Abs(enemy.enemy.transform.rotation.eulerAngles.z - enemy.angle - 360), Mathf.Abs(enemy.enemy.transform.rotation.eulerAngles.z - enemy.angle + 360)));
+            if (enemy.CW)
+            {
+                if (enemy.enemy.transform.rotation.eulerAngles.z < enemy.angle)
+                {
+                    enemy.enemy.transform.rotation = Quaternion.Euler(0, 0, Mathf.Clamp(enemy.angle, enemy.enemy.transform.rotation.eulerAngles.z + 360 - EnemyTurnAnglePerFrame, enemy.enemy.transform.rotation.eulerAngles.z + 360));
+                }
+                else
+                    enemy.enemy.transform.rotation = Quaternion.Euler(0, 0, Mathf.Clamp(enemy.angle, enemy.enemy.transform.rotation.eulerAngles.z - EnemyTurnAnglePerFrame, enemy.enemy.transform.rotation.eulerAngles.z));
+            }
+            else
+            {
+                if (enemy.enemy.transform.rotation.eulerAngles.z >= enemy.angle)
+                {
+                    enemy.enemy.transform.rotation = Quaternion.Euler(0, 0, Mathf.Clamp(enemy.angle + 360, enemy.enemy.transform.rotation.eulerAngles.z, enemy.enemy.transform.rotation.eulerAngles.z + EnemyTurnAnglePerFrame));
+                }
+                else
+                    enemy.enemy.transform.rotation = Quaternion.Euler(0, 0, Mathf.Clamp(enemy.angle, enemy.enemy.transform.rotation.eulerAngles.z, enemy.enemy.transform.rotation.eulerAngles.z + EnemyTurnAnglePerFrame));
+            }
+        }
+
+        else
+        {
+            enemy.TriggerOnceOnly = true;
+            //Calculates perpendicular line from angle at boss position, where slope is desired angle of enemy
+            int test = 0;
+            float Range = Time.fixedDeltaTime * enemy.enemy.GetComponent<Rigidbody2D>().velocity.magnitude;
+            //Equation of line, y = mx+b
+            do
+            {
+                Vector2 firstPos, secondPos;
+                if (enemy.angle != 0 && enemy.angle != 180)
+                {
+                    float m = (Mathf.Tan((enemy.angle + 270) * Mathf.PI / 180));
+                    float b = (enemy.endPosition.transform.position.y) - m * (enemy.endPosition.transform.position.x);
+                    float a1 = (m * m + 1), b1 = 2 * (b - enemy.enemy.transform.position.y) * m - 2 * enemy.enemy.transform.position.x, c1 = Mathf.Pow((b - enemy.enemy.transform.position.y), 2) - (Range) * (Range) - Mathf.Pow(enemy.enemy.transform.position.x, 2);
+                    float firstX = (-b1 + Mathf.Sqrt(b1 * b1 - 4 * a1 * c1)) / (2 * a1), secondX = (-b1 - Mathf.Sqrt(b1 * b1 - 4 * a1 * c1)) / (2 * a1);
+                    //The x coordinates mark where the line going through boss intersects with a circle depicting where enemy can travel
+                    firstPos = new Vector2(firstX, firstX * m + b);
+                    secondPos = new Vector2(secondX, secondX * m + b);
+                }
+                else
+                {
+                    float x = enemy.endPosition.transform.position.x;
+                    float a1 = 1, b1 = -2 * enemy.enemy.transform.position.y, c1 = Mathf.Pow(enemy.enemy.transform.position.y, 2) - (Range * Range) + Mathf.Pow(x - enemy.enemy.transform.position.x, 2);
+                    float firstY = (-b1 + Mathf.Sqrt(b1 * b1 - 4 * a1 * c1)) / (2 * a1), secondY = (-b1 - Mathf.Sqrt(b1 * b1 - 4 * a1 * c1)) / (2 * a1);
+                    firstPos = new Vector2(x, firstY);
+                    secondPos = new Vector2(x, secondY);
+                }
+
+                float angle1 = Vector2ToDegrees(firstPos - (Vector2)enemy.enemy.transform.position), angle2 = Vector2ToDegrees(secondPos - (Vector2)enemy.enemy.transform.position);
+                if ((angle1 >= 0 || angle1 < 0) && (angle2 >= 0 || angle2 < 0))
+                {
+                    if (Mathf.Min(Mathf.Abs(enemy.enemy.transform.rotation.eulerAngles.z - angle1), Mathf.Abs(enemy.enemy.transform.rotation.eulerAngles.z - (angle1 + 360)), Mathf.Abs(enemy.enemy.transform.rotation.eulerAngles.z - (angle1 - 360))) < Mathf.Min(Mathf.Abs(enemy.enemy.transform.rotation.eulerAngles.z - angle2), Mathf.Abs(enemy.enemy.transform.rotation.eulerAngles.z - (angle2 + 360)), Mathf.Abs(enemy.enemy.transform.rotation.eulerAngles.z - (angle2 - 360))))
+                    {
+                        enemy.enemy.transform.rotation = Quaternion.Euler(0, 0, ClampAngle(angle1, enemy.enemy.transform.rotation.eulerAngles.z, EnemyTurnAnglePerFrame * 2));
+                    }
+                    else
+                    {
+                        enemy.enemy.transform.rotation = Quaternion.Euler(0, 0, ClampAngle(angle2, enemy.enemy.transform.rotation.eulerAngles.z, EnemyTurnAnglePerFrame * 2));
+                    }
+                    break;
+                }
+                Range += 0.1f;
+                test++;
+                if (test >= 1000)
+                {
+                    Debug.Log("Wave enemy looped over 1000, force break");
+                    break;
+                }
+            } while (true);
+
+        }
+        enemy.enemy.GetComponent<Rigidbody2D>().velocity = enemy.enemy.transform.up * EnemySpeed;
+    }
     
     void OnTriggerEnter2D(Collider2D other)
     {
         if (other.GetComponent<Enemy1Script>() != null)//if other is an enemy1
         {
             foreach (OrbitingEnemy enemy1 in EnemySwarm)
+            {
+                if (enemy1.enemy == other.gameObject)
+                {
+                    return;
+                }
+            }
+            foreach (PositionAngleBeforePoint enemy1 in PlayerChargingEnemies)
             {
                 if (enemy1.enemy == other.gameObject)
                 {
@@ -231,44 +335,58 @@ public class SwarmBossInfluence : MonoBehaviour
         return (angle1+360)%360;
     }
 
-    List<PositionAngleBeforePoint> SendWave(float MaxAngle, float NumberOfShips, float AngleOffsetCCW)
+    //Instantiates a new PositionAngleBeforePoint enemy with the closest Enemy with DesiredAngle + 180, angled at DesiredAngle,
+    //Going through the boss enemy position, and turning towards the boss when it needs to turn
+    public List<PositionAngleBeforePoint> AddAttackingShip(List<PositionAngleBeforePoint> ListToAddTo, float DesiredAngle)
     {
-        List<PositionAngleBeforePoint> Send = new List<PositionAngleBeforePoint>();
-        float CurrentAngle = MaxAngle;
-        for (int i = 0; i < NumberOfShips; i++)
+        List<GameObject> enemiesInRange = new List<GameObject>();
+        foreach (OrbitingEnemy enemy1 in EnemySwarm)
         {
-            List<GameObject> enemiesInRange = new List<GameObject>();
+            if (Vector2.Distance(enemy1.enemy.transform.position, gameObject.transform.position) <= minimumRadius + 1)
+                enemiesInRange.Add(enemy1.enemy);
+        }
+        if (enemiesInRange.Count != 0)
+        {
+            GameObject FoundShip = FindClosestAngle(DesiredAngle, enemiesInRange);
+            bool CW;
+
+            Vector2 AddTo = DegreesToVector2(FoundShip.transform.rotation.eulerAngles.z + 45), AddTo2 = DegreesToVector2(FoundShip.transform.rotation.eulerAngles.z - 45);
+            if (Vector2.Distance((Vector2)FoundShip.transform.position + AddTo, gameObject.transform.position) < (Vector2.Distance((Vector2)FoundShip.transform.position + AddTo2, gameObject.transform.position)))
+            {
+                CW = false;
+            }
+            else CW = true;
+            ListToAddTo.Add(new PositionAngleBeforePoint(FoundShip, gameObject, (DesiredAngle + 180) % 360, CW));
             foreach (OrbitingEnemy enemy1 in EnemySwarm)
             {
-                if (Vector2.Distance(enemy1.enemy.transform.position, gameObject.transform.position) <= minimumRadius + 1)
-                    enemiesInRange.Add(enemy1.enemy);
-            }
-            if (enemiesInRange.Count != 0)
-            {
-                GameObject FoundShip = FindClosestAngle(CurrentAngle + AngleOffsetCCW, enemiesInRange);
-                bool CW;
-
-                Vector2 AddTo = DegreesToVector2(FoundShip.transform.rotation.eulerAngles.z + 45), AddTo2 = DegreesToVector2(FoundShip.transform.rotation.eulerAngles.z - 45);
-                if (Vector2.Distance((Vector2)FoundShip.transform.position + AddTo, gameObject.transform.position) < (Vector2.Distance((Vector2)FoundShip.transform.position + AddTo2, gameObject.transform.position)))
+                if (enemy1.enemy == FoundShip)
                 {
-                    CW = false;
+                    EnemySwarm.Remove(enemy1);
+                    break;
                 }
-                else CW = true;
-                Send.Add(new PositionAngleBeforePoint(FoundShip, gameObject, (CurrentAngle + 180 + AngleOffsetCCW) % 360, CW));
-
-                foreach (OrbitingEnemy enemy1 in EnemySwarm)
-                {
-                    if (enemy1.enemy == FoundShip)
-                    {
-                        EnemySwarm.Remove(enemy1);
-                        break;
-                    }
-                }
-            }
-            CurrentAngle -= (MaxAngle / (NumberOfShips - 1) * 2);
+            }
         }
-        return Send;
-    }
+        return ListToAddTo;
+    }
+
+
+    public void SendWave(float MaxAngle, float NumberOfShips)
+    {
+        float CurrentAngle = MaxAngle;
+
+        GameObject playerRef = GameObject.FindGameObjectWithTag("Player");
+        if (playerRef == null)
+        {
+            return;
+        }
+
+        float AngleOffsetCCW = (Vector2.SignedAngle(new Vector2(0, -1), playerRef.transform.position - transform.position));
+        for (int i = 0; i < NumberOfShips; i++)
+        {
+            NonOrbitingEnemies = AddAttackingShip(NonOrbitingEnemies, CurrentAngle + AngleOffsetCCW);
+            CurrentAngle -= (MaxAngle / (NumberOfShips - 1) * 2);
+        }
+    }
 
     //Finds enemy1 in List that has the closest angle to Angle
     //List must be non-empty!
@@ -360,7 +478,7 @@ public class PositionAngleBeforePoint
     public GameObject endPosition;//position to reach
     public float angle;//Angle in Degrees
     public bool CW;//Should ship spin clockwise or counterclockwise first?
-    public bool TriggerOnceOnly = false;
+    public bool TriggerOnceOnly = false, StartedTurning = false, StartedSlowing = false;
     public PositionAngleBeforePoint(GameObject enemy, GameObject endPosition, float angle, bool CW)
     {
         this.enemy = enemy;
