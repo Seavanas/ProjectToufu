@@ -9,7 +9,8 @@ public class Enemy1Script : MonoBehaviour {
     private Rigidbody2D rb;
     private Vector2 perlinSeed;
     public Vector2 perlinRate;
-    public float speed;
+    public float speed, magnitude;
+    public bool randomizeSpeed = true;
 
     // Use this for initialization
     void Start()
@@ -34,7 +35,11 @@ public class Enemy1Script : MonoBehaviour {
 
     void FixedUpdate()
     {
-        float perlineValue = Mathf.PerlinNoise(perlinSeed.x + Time.time * perlinRate.x, perlinSeed.y + Time.time * perlinRate.y);
-        rb.velocity = transform.up * speed * perlineValue;
+        if (randomizeSpeed)
+        {
+            float perlineValue = Mathf.PerlinNoise(perlinSeed.x + Time.time * perlinRate.x, perlinSeed.y + Time.time * perlinRate.y);
+            rb.velocity = transform.up * (speed + (perlineValue * magnitude));
+        }
+
     }
 }

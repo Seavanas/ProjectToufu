@@ -256,6 +256,7 @@ public class SwarmBossInfluence : MonoBehaviour
             }
             EnemySwarm.Add(new OrbitingEnemy(other.gameObject, EnemySpeed));
             other.GetComponent<Mover>().enabled = false;
+            other.GetComponent<Enemy1Script>().randomizeSpeed = false;
         }
     }
 
