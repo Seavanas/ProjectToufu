@@ -37,8 +37,9 @@ public class L1LevelComplete : MonoBehaviour {
         {
             print("you win");
             GameObject playerObject = GameObject.FindWithTag("Player");
+            if (playerObject != null)
             //playerObject.GetComponent<PlayerController>().enabled = false;            this casues bug
-            playerObject.transform.position = Vector2.MoveTowards(playerObject.transform.position, cutScenePoint.position, cutSceneSpeed);
+                playerObject.transform.position = Vector2.MoveTowards(playerObject.transform.position, cutScenePoint.position, cutSceneSpeed);
 
             //sometimes the playerobject is killed or not found, need to fix
         }

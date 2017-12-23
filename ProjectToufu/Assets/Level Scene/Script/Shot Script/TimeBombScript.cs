@@ -9,8 +9,8 @@ namespace TimeBombScriptNS
         private Animator animator;
 
         public bool active;
-        public int asdf;
-        public float qwerty;//bad name
+        public int NumberOfShots;
+        public float SpeedOfCountDown;//bad name
         public GameObject gameObjectThing;
 
         bool TriggerOnceOnly = false;
@@ -26,8 +26,8 @@ namespace TimeBombScriptNS
         {
 
             animator = gameObject.GetComponent<Animator>();
-            animator.speed = qwerty;
-            ListOfShots = new GameObject[asdf];
+            animator.speed = SpeedOfCountDown;
+            ListOfShots = new GameObject[NumberOfShots];
         }
 
         // Update is called once per frame
@@ -46,7 +46,7 @@ namespace TimeBombScriptNS
 
                         //Extract method
                         float angle = 0;
-                        for (int i = 0; i < asdf; i++)
+                        for (int i = 0; i < NumberOfShots; i++)
                         {
                             GameObject shotInstance = Instantiate(gameObjectThing, gameObject.transform.position, Quaternion.identity);//Inline Temp
                             ListOfShots[i] = shotInstance;
@@ -86,7 +86,7 @@ namespace TimeBombScriptNS
 
         float incrementAngle(float angle)
         {
-            return angle + (360 / asdf);
+            return angle + (360 / NumberOfShots);
         }
 
         public void AnimationEvent_Destroy()
