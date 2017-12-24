@@ -79,9 +79,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\AllScenes\SaveInfo.cs" />
-    <Compile Include="Assets\CameraScript.cs" />
-    <Compile Include="Assets\Health.cs" />
     <Compile Include="Assets\Level Scene\Script\BackgroundScript.cs" />
+    <Compile Include="Assets\Level Scene\Script\CameraScript.cs" />
     <Compile Include="Assets\Level Scene\Script\Enemy Script\AgileEnemy.cs" />
     <Compile Include="Assets\Level Scene\Script\Enemy Script\BaseBossScript.cs" />
     <Compile Include="Assets\Level Scene\Script\Enemy Script\BaseEnemyScript.cs" />
@@ -90,6 +89,7 @@
     <Compile Include="Assets\Level Scene\Script\Enemy Script\Enemy2.cs" />
     <Compile Include="Assets\Level Scene\Script\Enemy Script\Enemy3.cs" />
     <Compile Include="Assets\Level Scene\Script\Enemy Script\Enemy3_2.cs" />
+    <Compile Include="Assets\Level Scene\Script\Enemy Script\Health.cs" />
     <Compile Include="Assets\Level Scene\Script\Enemy Script\InjuresPlayer.cs" />
     <Compile Include="Assets\Level Scene\Script\Enemy Script\MultiShotEnemy.cs" />
     <Compile Include="Assets\Level Scene\Script\Enemy Script\SwarmBoss.cs" />
@@ -118,6 +118,7 @@
     <Compile Include="Assets\Level Scene\Script\Shot Script\Missile2Script.cs" />
     <Compile Include="Assets\Level Scene\Script\Shot Script\Shot1Script.cs" />
     <Compile Include="Assets\Level Scene\Script\Shot Script\Shot2Script.cs" />
+    <Compile Include="Assets\Level Scene\Script\Shot Script\TimeBombScript.cs" />
     <Compile Include="Assets\Level Scene\Script\UpgradeByContact.cs" />
     <Compile Include="Assets\MapScene\Scripts\LevelControllerMap.cs" />
     <Compile Include="Assets\MapScene\Scripts\TypingScript.cs" />
