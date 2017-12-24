@@ -84,6 +84,7 @@
     <Compile Include="Assets\Level Scene\Script\Enemy Script\AgileEnemy.cs" />
     <Compile Include="Assets\Level Scene\Script\Enemy Script\BaseBossScript.cs" />
     <Compile Include="Assets\Level Scene\Script\Enemy Script\BaseEnemyScript.cs" />
+    <Compile Include="Assets\Level Scene\Script\Enemy Script\ChargeScan.cs" />
     <Compile Include="Assets\Level Scene\Script\Enemy Script\DoubleShotEnemy.cs" />
     <Compile Include="Assets\Level Scene\Script\Enemy Script\Enemy1Script.cs" />
     <Compile Include="Assets\Level Scene\Script\Enemy Script\Enemy2.cs" />
@@ -92,6 +93,7 @@
     <Compile Include="Assets\Level Scene\Script\Enemy Script\Health.cs" />
     <Compile Include="Assets\Level Scene\Script\Enemy Script\InjuresPlayer.cs" />
     <Compile Include="Assets\Level Scene\Script\Enemy Script\MultiShotEnemy.cs" />
+    <Compile Include="Assets\Level Scene\Script\Enemy Script\SpikeShield.cs" />
     <Compile Include="Assets\Level Scene\Script\Enemy Script\SwarmBoss.cs" />
     <Compile Include="Assets\Level Scene\Script\Enemy Script\SwarmBossInfluence.cs" />
     <Compile Include="Assets\Level Scene\Script\Enemy Script\TankSpikeBoss.cs" />
