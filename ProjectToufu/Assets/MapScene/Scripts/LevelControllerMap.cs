@@ -15,7 +15,7 @@ public class LevelControllerMap : MonoBehaviour {
     public Button Quit, Continue, Settings, Save;
     public GameObject HeadText;//head of the text of game menu
 
-    public Button PlayTEMPORARY;//temporary
+    //public Button PlayTEMPORARY;//temporary
 
 	// Use this for initialization
 	void Start () {
@@ -25,7 +25,7 @@ public class LevelControllerMap : MonoBehaviour {
         Save.onClick.AddListener(SaveButton);
         PauseMenu.SetActive(false);
 
-        PlayTEMPORARY.onClick.AddListener(PlayLevel);
+       // PlayTEMPORARY.onClick.AddListener(PlayLevel);
 	}
 	
 	// Update is called once per frame
@@ -71,9 +71,9 @@ public class LevelControllerMap : MonoBehaviour {
     {
         SaveInfo.saveInfo.Save();
     }
-    private void PlayLevel()
+    /*private void PlayLevel()
     {
         SceneManager.LoadScene("Main");
     }
-
+    */
 }
