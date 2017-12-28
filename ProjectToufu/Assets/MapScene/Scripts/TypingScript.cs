@@ -27,8 +27,7 @@ public class TypingScript : MonoBehaviour {
 
     public void Reset()
     {
-        Text.text = "";
-        CurrentLetter = 0;
+        Start();
         StartTyping = false;
         foreach (GameObject text in NextText)
         {
