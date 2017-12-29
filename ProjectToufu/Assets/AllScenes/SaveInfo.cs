@@ -46,6 +46,8 @@ public class SaveInfo : MonoBehaviour {
 public class SaveInfoObject
 {
     public int Lives, Score;
-    
+    public int CurrentLevel = 0;
 
+    public int AttackType = 1;
+    public float AttackStrength = 5, AttackFrequency = 0.2f, MaxHealth = 100;
 }
