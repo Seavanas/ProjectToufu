@@ -16,7 +16,6 @@ public class SpikeShield : MonoBehaviour
     public float chargeSpeed;
     public float turnSpeed;
     private Rigidbody2D rb;
-    //private GameObject target;
 
     //Stats
     public BaseEnemyScript baseEnemyScript;
@@ -50,18 +49,14 @@ public class SpikeShield : MonoBehaviour
 
     void FixedUpdate()
     {
-        GameObject target = GameObject.FindGameObjectWithTag("Player");
+        Transform target = GameObject.FindGameObjectWithTag("Player").transform;
         if (target != null)
         {
-            if ((Time.time > nextCharge) && chargeStart)     //Start charging or in the middle of charging
+            if ((Time.time > nextCharge) && chargeStart && FarEnough(transform.position, target.position) || 
+                    chargeStart && FarEnough(transform.position, target.position))     //Start charging or in the middle of charging
             {
                 TurnToTarget(oldSelfPosition, chargePosition);      //Make sure to charge at "about" the chargePosition without turning back when charge past the target position
 
-                if (Vector2.Angle(-transform.up, chargePosition - oldSelfPosition) < 1)  //make sure only charge when facing at "about" the chargePosition 
-                    rb.velocity = -transform.up * chargeSpeed;  //Charge forward
-
-                //transform.position += (chargePosition - transform.position).normalized * chargeSpeed * Time.deltaTime;
-                //transform.position = Vector2.MoveTowards(transform.position, chargePosition, chargeSpeed);  //Charge towards chargePosition
                 if (chargeStop)      //Finish charging (hit the border or the player)
                 {
                     chargeStart = false;
@@ -69,10 +64,14 @@ public class SpikeShield : MonoBehaviour
                     rb.velocity = Vector2.zero;
                     nextCharge = Time.time + chargeRate;   //Charge attack goes on cold down
                 }
+                else if (Vector2.Angle(-transform.up, chargePosition - oldSelfPosition) < 1)  //make sure only charge when facing at "about" the chargePosition 
+                {
+                    rb.velocity = -transform.up * chargeSpeed;  //Charge forward
+                }
             }
             else
             {
-                TurnToTarget(transform.position, target.transform.position);   //Try to face the target
+                TurnToTarget(transform.position, target.position);   //Try to face the target
             }
         }
     }
@@ -83,9 +82,19 @@ public class SpikeShield : MonoBehaviour
         transform.Rotate(0, 0, angleDifference * turnSpeed * Time.deltaTime);   //Turn turnSpeed*angle per sec, so the larger the angle the faster it turns
     }
 
+    bool FarEnough(Vector3 self, Vector3 target)
+    {
+        if (Vector3.Distance(self, target) < 0.5)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Border") || other.CompareTag("Player"))   //To prevent player goes into border and let boss charge off
+        if (other.CompareTag("Border"))   //To prevent player goes into border and let boss charge off
         {
             chargeStop = true;
         }

@@ -125,7 +125,9 @@
     <Compile Include="Assets\MapScene\Scripts\LevelControllerMap.cs" />
     <Compile Include="Assets\MapScene\Scripts\TypingScript.cs" />
     <Compile Include="Assets\NEW STUFF\SpeedBoat.cs" />
-    <Compile Include="Assets\UpgradeMenuScene\TabScript.cs" />
+    <Compile Include="Assets\UpgradeMenuScene\Scripts\HUDTextFacade.cs" />
+    <Compile Include="Assets\UpgradeMenuScene\Scripts\LoadNextLevel.cs" />
+    <Compile Include="Assets\UpgradeMenuScene\Scripts\TabScript.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Free Particle Pack\Standard Assets\ParticleSystems\ParticleSystemsGuidelines.txt" />
