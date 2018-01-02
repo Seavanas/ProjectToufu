@@ -5,7 +5,7 @@ using UnityEngine;
 public class BackgroundScript : MonoBehaviour {
 
     public float speed;
-    private float lengthDividedBy2 = 34;
+    public float lengthDividedBy2 = 34;
     private float startingYPosition;
     
 	// Use this for initialization

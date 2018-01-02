@@ -43,6 +43,7 @@ public class PlayerController : MonoBehaviour {
         SaveInfoObject temp = SaveInfo.saveInfo.SaveObject;
         fireRate = temp.AttackFrequency;
         basePlayerScript.health = temp.MaxHealth;
+        NumberOfShots = temp.AttackType;
         
 	}
 	
