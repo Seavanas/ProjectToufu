@@ -93,10 +93,20 @@ public class Enemy3 : MonoBehaviour {
 
     public void RemoveNull()
     {
-        for (int i = 0; i < ListOfShots.Count; i++)
+        bool allRemoved = false;
+        while (!allRemoved)
         {
-            if (ListOfShots[i] == null)
-                ListOfShots.RemoveAt(i);
+            allRemoved = true;
+            for (int i = 0; i < ListOfShots.Count; i++)
+            {
+                if (ListOfShots[i] == null)
+                {
+                    ListOfShots.RemoveAt(i);
+                    allRemoved = false;
+                    break;
+                }
+            }
+
         }
     }
     

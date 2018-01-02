@@ -15,13 +15,14 @@ public class PlayerController : MonoBehaviour {
     //public Boundary boundary;
 
     //Upgrade stuff
-    private SpriteRenderer sr;
-    public Sprite characterUpgrade1;
+   // private SpriteRenderer sr;
+   // public Sprite characterUpgrade1;
 
     //Shot stuff
     public GameObject shot;
-    public GameObject shotUpgrade1;
-    public Transform shotSpawn;
+    public int NumberOfShots;
+    //public GameObject shotUpgrade1;
+    public Transform[] shotSpawn;
     public float fireRate;
     private float nextFire;
 
@@ -35,9 +36,15 @@ public class PlayerController : MonoBehaviour {
     void Start () {
         //gameOver = false;
         rb = GetComponent<Rigidbody2D>();
-        sr = GetComponent<SpriteRenderer>();
+       // sr = GetComponent<SpriteRenderer>();
         basePlayerScript = GetComponent<BasePlayerScript>();
         levelController = GameObject.FindGameObjectWithTag("LevelController").GetComponent<LevelController>();
+
+        SaveInfoObject temp = SaveInfo.saveInfo.SaveObject;
+        fireRate = temp.AttackFrequency;
+        basePlayerScript.health = temp.MaxHealth;
+        NumberOfShots = temp.AttackType;
+        
 	}
 	
 	// Update is called once per frame
@@ -50,7 +57,10 @@ public class PlayerController : MonoBehaviour {
 
         else if (Input.GetButton("Fire1") && Time.time > nextFire) {
             nextFire = Time.time + fireRate;
-            Instantiate(shot, shotSpawn.position, shotSpawn.rotation);
+            for (int i = 0; i < NumberOfShots; i++)
+            {
+                Instantiate(shot, shotSpawn[i].position, shotSpawn[i].rotation);
+            }
         }
         /*
         float x = Mathf.Clamp(rb.position.x, boundary.xMin, boundary.xMax);
@@ -82,8 +92,8 @@ public class PlayerController : MonoBehaviour {
     }
 
     public void Upgrade() {
-        sr.sprite = characterUpgrade1;
+        /*sr.sprite = characterUpgrade1;
         transform.localScale = new Vector2(0.3f, 0.3f);
-        shot = shotUpgrade1;
+        shot = shotUpgrade1;*/
     }
 }
