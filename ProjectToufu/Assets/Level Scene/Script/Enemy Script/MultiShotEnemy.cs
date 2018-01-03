@@ -8,7 +8,7 @@ public class MultiShotEnemy : MonoBehaviour {
     public Transform shotSpawn;
     public int shotAmount;
     public int shotSpeed;
-    public float shotAngle;
+    public float shotAngle;     //Angle between each shot
     public float fireRate;
     private float nextFire;
 
@@ -30,13 +30,13 @@ public class MultiShotEnemy : MonoBehaviour {
         }
         else if (Time.time > nextFire)
         {
-            float startAngle;
+            float startAngle = transform.localEulerAngles.z;        //Get the rotation of the this object
             if (shotAmount % 2 == 0)     //If shotAmount is even
             {
-                startAngle = 180 - (shotAngle * (Mathf.Floor(shotAmount / 2) - 1)) - (shotAngle / 2);
+                startAngle += 180 - (shotAngle * (Mathf.Floor(shotAmount / 2) - 1)) - (shotAngle / 2);
             }
             else
-                startAngle = 180 - (shotAngle * Mathf.Floor(shotAmount / 2));
+                startAngle += 180 - (shotAngle * Mathf.Floor(shotAmount / 2));
 
             for (int i = 0; i < shotAmount; i++)
                 Instantiate(shot, shotSpawn.position, Quaternion.Euler(0, 0, startAngle + shotAngle * i));
