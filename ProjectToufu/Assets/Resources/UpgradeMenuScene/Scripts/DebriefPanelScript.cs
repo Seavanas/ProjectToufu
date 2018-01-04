@@ -19,18 +19,19 @@ public class DebriefPanelScript : MonoBehaviour {
         {
             activateOnce = true;
             SaveInfoObject temp = SaveInfo.saveInfo.SaveObject;
-            //if (temp.EnemiesKilledPrevious != null)
+            if (temp.EnemiesKilledPrevious != null)
             {
-                //Dictionary<string, int> lastlevel = temp.EnemiesKilledPrevious;
-                //foreach (KeyValuePair<string, int> prefab in lastlevel)
+                Dictionary<string, int> lastlevel = temp.EnemiesKilledPrevious;
+                foreach (KeyValuePair<string, int> prefab in lastlevel)
                 {
                     //Debug.Log("Enemy1");
-                    GameObject prefabObject = GameObject.Find("Enemy1");
+                    GameObject prefabObject = (GameObject)Resources.Load("Level Scene\\Prefab\\Enemy\\" + prefab.Key);
                     Vector2 position = new Vector2(SpawnPrefabHereX, SpawnPrefabHereY);
                     GameObject created = Instantiate(enemyIconPrefab, position, Quaternion.identity);
                     created.transform.parent = contentBox.transform;
                     created.transform.localPosition = position;
                     created.GetComponent<Image>().sprite = prefabObject.GetComponent<SpriteRenderer>().sprite;
+                    created.GetComponentInChildren<Text>().text = "Number Eliminated: " + prefab.Value;
                     SpawnPrefabHereY -= 50;
                 }
             }
