@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class L1LevelComplete : MonoBehaviour {
     //Spawning enemy stuff
@@ -16,6 +17,7 @@ public class L1LevelComplete : MonoBehaviour {
     private bool defeat;
     private bool victory;
     private bool waveEnds;
+    private bool activateOnce = false;
 
     void Start () {
         victory = false;
@@ -41,6 +43,13 @@ public class L1LevelComplete : MonoBehaviour {
             //playerObject.GetComponent<PlayerController>().enabled = false;            this casues bug
                 playerObject.transform.position = Vector2.MoveTowards(playerObject.transform.position, cutScenePoint.position, cutSceneSpeed);
 
+            if (!activateOnce)
+            {
+                SaveInfo.saveInfo.SaveObject.EnemiesKilledPrevious = LevelController.levelController.EnemiesKilled;
+                SaveInfo.saveInfo.SaveObject.CurrentLevel++;
+                SceneManager.LoadScene("UpgradeMenu");
+                activateOnce = true;
+            }
             //sometimes the playerobject is killed or not found, need to fix
         }
     }

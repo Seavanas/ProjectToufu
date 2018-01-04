@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class LevelController : MonoBehaviour {
+    public static LevelController levelController;
+
     //Player stuff
     public Transform playerSpawnPoint;
     public GameObject playerShip;
@@ -18,8 +20,13 @@ public class LevelController : MonoBehaviour {
     public event EventHandler defeatEventHandler;
     public GameObject defeatCanvas;
     public float defeatScreenWait;
+    public Dictionary<String, int> EnemiesKilled = new Dictionary<string, int>();//contains prefab names of all enemies killed in this level
 
     void Start() {
+        if (levelController == null)
+        {
+            levelController = this;
+        }
         GameObject hudObject = GameObject.FindWithTag("Hud");
         hud = hudObject.GetComponent<HUDFacade>();
         hud.SetLives(playerLives);
