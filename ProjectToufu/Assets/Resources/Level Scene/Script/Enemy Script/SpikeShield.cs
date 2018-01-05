@@ -4,16 +4,22 @@ using UnityEngine;
 
 public class SpikeShield : MonoBehaviour
 {
-    //Attack
-    public Vector3 oldSelfPosition;
-    public Vector3 chargePosition;
-    public bool chargeStart;
+    //Charge
+    //private Vector3 oldSelfPosition;
+    //private Vector3 chargePosition;
     public float chargeRate;
+    public float chargeSpeed;
     private float nextCharge;
+    //Charge to target
+    private bool chargeStart;
     private bool chargeStop;
+    //Enrage
+    public GameObject bomb;
+    public float bombRate;
+    private float nextBomb;
+    public float enrageHealth;
 
     //Movement stuff
-    public float chargeSpeed;
     public float turnSpeed;
     private Rigidbody2D rb;
 
@@ -21,7 +27,6 @@ public class SpikeShield : MonoBehaviour
     public BaseEnemyScript baseEnemyScript;
     public BaseBossScript baseBossScript;
     private float currentHealth;
-    private bool enrage;
 
     void Start ()
     {
@@ -30,20 +35,12 @@ public class SpikeShield : MonoBehaviour
         baseBossScript.InitiateHUD();
     }
 	
-	void Update () {
+	void Update ()
+    {
         if (currentHealth != baseEnemyScript.health)
         {
             baseBossScript.SetHealth(baseEnemyScript.health / baseEnemyScript.GetMaxHealth());
             currentHealth = baseEnemyScript.health;
-        }
-
-        //Experimenting
-        if (currentHealth == 450)
-        {
-            enrage = true;
-            chargeRate = 0.5f;
-            chargeSpeed = 20;
-            turnSpeed = 5;
         }
     }
 
@@ -52,21 +49,31 @@ public class SpikeShield : MonoBehaviour
         Transform target = GameObject.FindGameObjectWithTag("Player").transform;
         if (target != null)
         {
-            if ((Time.time > nextCharge) && chargeStart && FarEnough(transform.position, target.position) || 
-                    chargeStart && FarEnough(transform.position, target.position))     //Start charging or in the middle of charging
+            if ((Time.time > nextCharge) && chargeStart && FarEnough(transform.position, target.position) || chargeStart)        //Target found
             {
-                TurnToTarget(oldSelfPosition, chargePosition);      //Make sure to charge at "about" the chargePosition without turning back when charge past the target position
-
-                if (chargeStop)      //Finish charging (hit the border or the player)
+                if (chargeStop)         //Finish charging (hit the border)
                 {
                     chargeStart = false;
                     chargeStop = false;
                     rb.velocity = Vector2.zero;
                     nextCharge = Time.time + chargeRate;   //Charge attack goes on cold down
                 }
-                else if (Vector2.Angle(-transform.up, chargePosition - oldSelfPosition) < 1)  //make sure only charge when facing at "about" the chargePosition 
+                else
                 {
-                    rb.velocity = -transform.up * chargeSpeed;  //Charge forward
+                    ChargeAttack();
+                    if (currentHealth < enrageHealth)
+                    {
+                        if ((Time.time > nextBomb))
+                        {
+                            Instantiate(bomb, transform.position, Quaternion.Euler(0, 0, transform.eulerAngles.z - 30));
+                            Instantiate(bomb, transform.position, Quaternion.Euler(0, 0, transform.eulerAngles.z - 90));
+                            Instantiate(bomb, transform.position, Quaternion.Euler(0, 0, transform.eulerAngles.z - 150));
+                            Instantiate(bomb, transform.position, Quaternion.Euler(0, 0, transform.eulerAngles.z - 210));
+                            Instantiate(bomb, transform.position, Quaternion.Euler(0, 0, transform.eulerAngles.z - 270));
+                            Instantiate(bomb, transform.position, Quaternion.Euler(0, 0, transform.eulerAngles.z - 330));
+                            nextBomb = Time.time + bombRate;
+                        }
+                    }
                 }
             }
             else
@@ -74,6 +81,14 @@ public class SpikeShield : MonoBehaviour
                 TurnToTarget(transform.position, target.position);   //Try to face the target
             }
         }
+    }
+
+    void ChargeAttack()
+    {
+        rb.velocity = -transform.up * chargeSpeed;  //Charge forward
+        //TurnToTarget(oldSelfPosition, chargePosition);      //Make sure to charge at "about" the chargePosition without turning back when charge past the target position
+
+        //if (Vector2.Angle(-transform.up, chargePosition - oldSelfPosition) < 1)  //make sure only charge when facing at "about" the chargePosition
     }
 
     void TurnToTarget(Vector3 self, Vector3 target)
@@ -92,7 +107,7 @@ public class SpikeShield : MonoBehaviour
         return true;
     }
 
-    void OnTriggerEnter2D(Collider2D other)
+    void OnTriggerExit2D(Collider2D other)
     {
         if (other.CompareTag("Border"))   //To prevent player goes into border and let boss charge off
         {
@@ -100,4 +115,8 @@ public class SpikeShield : MonoBehaviour
         }
     }
     //Sometime when player quickly moves in and out of the ChargeScan hitbox boss won't attack, might be the update rate too slow
+
+    //public void SetOldSelfPosition(Vector3 value) { oldSelfPosition = value; }
+    //public void SetChargePosition(Vector3 value) { chargePosition = value; }
+    public void SetChargeStart(bool value) { chargeStart = value; }
 }
