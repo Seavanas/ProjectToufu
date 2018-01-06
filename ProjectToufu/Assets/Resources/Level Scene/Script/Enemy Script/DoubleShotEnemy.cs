@@ -9,15 +9,23 @@ public class DoubleShotEnemy : MonoBehaviour {
     public float fireRate;
     private float nextFire;
 
+    //Attack point limit, choose a point within the range
+    public Vector2 minLimit;
+    public Vector2 maxLimit;
+    private Vector3 attackPoint;     //Store the chosen attack point
+
     //Movement stuff
+    public float speed;
     private Rigidbody2D rb;
+    private Vector3 oldPosition;
+    /*
     public float overallSpeed;  //Overall speed when moving
     private Vector2 speed;       //How much the object is moving horizontally and vertically
     public Vector2 maxMovement; //Max sec the object is moving horizontally and vertically before it goes in the oppsite direction
     private float xNextMove;    //To determine if the object should change its x direction
     private float yNextMove;    //To determine if the object should change its y direction
     private Vector2 movement;
-    private Vector2 attackPosition;
+    */
 
     //Stats
     public BaseEnemyScript baseEnemyScript;
@@ -26,26 +34,27 @@ public class DoubleShotEnemy : MonoBehaviour {
     {
         baseEnemyScript = GetComponent<BaseEnemyScript>();
         rb = GetComponent<Rigidbody2D>();
-        
-        float[] xSpeed = { -1f, 1f };
-        Random random = new Random();
-        attackPosition = new Vector2(Random.Range(-7f, 3f), Random.Range(5f, 7f));
+        NewDirection();
+
+        // float[] xSpeed = { -1f, 1f };
+        /*
         if ((attackPosition.x - maxMovement.x) < -7f)
             speed = new Vector2(-1, 0);
         else if ((attackPosition.x + maxMovement.x) > 3f)
             speed = new Vector2(1, 0);
         else
             speed = new Vector2(xSpeed[Random.Range(0,1)], 0);
+            */
     }
-	
-	void Update ()
+
+    void Update ()
     {
         if (baseEnemyScript.health <= 0)
         {
             baseEnemyScript.scoreAdd();
             Destroy(gameObject);
         }
-        else if ((inAttackPosition()) && (Time.time > nextFire))
+        else if (Time.time > nextFire)
         {
             nextFire = Time.time + fireRate;
             Instantiate(shot, shotSpawn1.position, shotSpawn1.rotation);
@@ -55,6 +64,8 @@ public class DoubleShotEnemy : MonoBehaviour {
 
     void FixedUpdate()
     {
+        rb.velocity = (attackPoint - oldPosition).normalized * speed;
+        /*
         if (inAttackPosition())
         { 
             if (Time.time > xNextMove)  //Object has moved enough in the x axis
@@ -72,14 +83,33 @@ public class DoubleShotEnemy : MonoBehaviour {
             transform.position = Vector2.MoveTowards(transform.position, attackPosition, 0.1f);
 
         Vector2 movement = new Vector2(speed.x, speed.y);
-        rb.velocity = movement * overallSpeed;
+        rb.velocity = movement * overallSpeed;*/
+    }
+    /*
+    bool AtAttackPosition()
+    {
+        if (transform.position == attackPoint)
+            return true;
+        return false;
+    }
+    */
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Border"))
+        {
+            NewDirection();
+        }
     }
 
-    private bool inAttackPosition()
+    void NewDirection()
     {
-        if ((transform.position.x != attackPosition.x) && (transform.position.y != attackPosition.y))
-            return false;
-        return true;
+        do
+        {
+            oldPosition = transform.position;
+            Random random = new Random();
+            attackPoint = new Vector3(Random.Range(minLimit.x, maxLimit.x), Random.Range(minLimit.y, maxLimit.y), 0);
+        }
+        while (System.Math.Abs(attackPoint.x - oldPosition.x) < 1);     //Make sure the object doesn't move too vertically
     }
 
     //Gets called by animation event when firing animation finishes playing, resets the state to 0

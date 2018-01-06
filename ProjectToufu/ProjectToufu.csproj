@@ -129,6 +129,7 @@
     <Compile Include="Assets\Resources\UpgradeMenuScene\Scripts\HUDTextFacade.cs" />
     <Compile Include="Assets\Resources\UpgradeMenuScene\Scripts\LoadNextLevel.cs" />
     <Compile Include="Assets\Resources\UpgradeMenuScene\Scripts\TabScript.cs" />
+    <Compile Include="Assets\Resources\UpgradeMenuScene\Scripts\UIRingScript.cs" />
     <Compile Include="Assets\Resources\UpgradeMenuScene\Scripts\UpgradePanelScript.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -109,7 +109,7 @@ public class SpikeShield : MonoBehaviour
 
     void OnTriggerExit2D(Collider2D other)
     {
-        if (other.CompareTag("Border"))   //To prevent player goes into border and let boss charge off
+        if (other.CompareTag("Border"))
         {
             chargeStop = true;
         }
