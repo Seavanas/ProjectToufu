@@ -52,5 +52,5 @@ public class SaveInfoObject
     public float MainAttackStrength = 5, AttackFrequency = 0.2f, MaxHealth = 100;
 
     public Dictionary<String, int> EnemiesKilledTotal = new Dictionary<string, int>();
-    public Dictionary<String, int> EnemiesKilledPrevious;
+    public Dictionary<String, int> EnemiesKilledPrevious = new Dictionary<string, int>();
 }
