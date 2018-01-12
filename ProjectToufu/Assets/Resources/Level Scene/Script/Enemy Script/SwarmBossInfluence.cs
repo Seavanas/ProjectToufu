@@ -10,71 +10,183 @@ public class SwarmBossInfluence : MonoBehaviour
     /// Controls enemies that are inside the Circle of influence, such as attacks, organization, and movement
     /// </summary>
 
-    public float NumberOfShips;
+    public float NumberOfShipsOrbiting;
     public SwarmBoss SwarmBossScript;
     //public List<GameObject> EnemySwarm;
     public List<OrbitingEnemy> EnemySwarm;
     public bool StartFight = false;
     public float EnemyTurnAnglePerFrame, minimumRadius, EnemySpeed;
-    List<PositionAngleBeforePoint> NonOrbitingEnemies;
-    List<PositionAngleBeforePoint> PlayerChargingEnemies;
-    float TimeBeforeAttacking = 4;
+    List<AttackObject> NonOrbitingEnemies;
+    List<AttackObject> PlayerChargingEnemies;
+    List<AttackObject2> SideAttackingEnemies;
+    float TimeBeforeAttacking = 12;
+    float TimeDurationOfSideAttack = 1.5f;
+    float CurrentDuration;
+    bool StartedSideAttack = false;
     void Start()
     {
         EnemySwarm = new List<OrbitingEnemy>();
-        NonOrbitingEnemies = new List<PositionAngleBeforePoint>();
-        PlayerChargingEnemies = new List<PositionAngleBeforePoint>();
+        NonOrbitingEnemies = new List<AttackObject>();
+        PlayerChargingEnemies = new List<AttackObject>();
+        SideAttackingEnemies = new List<AttackObject2>();
         TimeBeforeAttacking += Time.time;
     }
 
     void FixedUpdate()
     {
 
-        List<OrbitingEnemy> NullObjects = new List<OrbitingEnemy>();
+        EnemySwarm = DeleteNull(EnemySwarm);
+        NumberOfShipsOrbiting = EnemySwarm.Count;
         foreach (OrbitingEnemy EnemySwarm1 in EnemySwarm)
         {
-            if (EnemySwarm1.enemy != null)
-            {
-                VectorWithinRadius(EnemySwarm1);
-            }
-            else NullObjects.Add(EnemySwarm1);
+            VectorWithinRadius(EnemySwarm1);
         }
-        foreach (OrbitingEnemy nullObj in NullObjects)
-        {
-            EnemySwarm.Remove(nullObj);
-        }
-        NumberOfShips = EnemySwarm.Count;
 
         NonOrbitingEnemies = DeleteNull(NonOrbitingEnemies);
         PlayerChargingEnemies = DeleteNull(PlayerChargingEnemies);
+        SideAttackingEnemies = DeleteNull(SideAttackingEnemies);
+        
 
 
-        foreach (PositionAngleBeforePoint enemy in NonOrbitingEnemies)
+        foreach (AttackObject enemy in NonOrbitingEnemies)
         {
             ControlWave(enemy);
         }
 
-        foreach (PositionAngleBeforePoint enemy in PlayerChargingEnemies)
+        foreach (AttackObject enemy in PlayerChargingEnemies)
         {
             ControlChargeAttack(enemy);
         }
 
+        foreach (AttackObject2 enemy in SideAttackingEnemies)
+        {
+            ControlSideAttack(enemy);
+            //print("huh");
+        }
 
 
 
 
-
-
+        if (StartedSideAttack == false)
+        {
+            CurrentDuration = Time.time;
+        }
         if (TimeBeforeAttacking < Time.time)
         {
-            TimeBeforeAttacking = Time.time + Random.Range(3, 3);
-            SendEnemiesAtPlayer(3, 0);
-            SendWave(30 + 5 * ((int)Random.Range(0, 8)), (int)Random.Range(3, 7));
+            StartedSideAttack = true;
+            TimeBeforeAttacking = Time.time + Random.Range(0.01f, 0.03f);
+            //SendEnemiesAtPlayer(3, 0);
+            //SendWave(30 + 5 * ((int)Random.Range(0, 8)), (int)Random.Range(3, 7));
+            Vector2 between = GameObject.FindGameObjectWithTag("Player").transform.position - transform.position;
+            float ang = Vector2ToDegrees(between);
+
+            AddSideAttackShip(ang-40, Random.Range(3, 6), 1, 10);
+            AddSideAttackShip(ang+40, Random.Range(3, 6), 1, 10);
+            //AddSideAttackShip(Random.Range(ang - 50, ang - 20), Random.Range(3, 6), 1, 10);
+            //AddSideAttackShip(Random.Range(ang + 20, ang + 50), Random.Range(3, 6), 1, 10);
+            if (CurrentDuration + TimeDurationOfSideAttack < Time.time)
+            {
+                TimeBeforeAttacking = 8 + Time.time;
+                StartedSideAttack = false;
+            }
         }
 
     }
 
-    void ControlChargeAttack(PositionAngleBeforePoint enemy)
+    //Finds enemy to add to list of enemies attacking from the side. Returns true if enemy got assigned
+    //InitialAngle is angle the enemy points at to begin with, InitialLength is length travelled forward before turning,
+    //IncomingAngle is angle the enemy should be at when it hits the player, InitalAngleRange is range of angle InitialAngle can be at
+    public bool AddSideAttackShip(float InitialAngle, float InitialLength, float IncomingAngle, float InitialAngleRange)
+    {
+        GameObject thePlayer = GameObject.FindGameObjectWithTag("Player");
+        if (thePlayer == null)
+        {
+            return false;
+        }
+
+        foreach (OrbitingEnemy enemy in EnemySwarm)
+        {
+            /*Vector2 perpToPlayer = transform.position - thePlayer.transform.position;
+            //This part manually multiplies the vector2 by sqrt(-1)
+            float tempX = perpToPlayer.x;
+            perpToPlayer.x = perpToPlayer.y * -1;
+            perpToPlayer.y = tempX;
+            */
+
+            if (enemy.enemy.transform.position.y >= transform.position.y)
+            {
+                if (Mathf.Abs(enemy.enemy.transform.eulerAngles.z - InitialAngle) <= InitialAngleRange)
+                {
+                    AttackObject2 attacking = new AttackObject2(enemy.enemy, new Vector2(thePlayer.transform.position.x, thePlayer.transform.position.y), IncomingAngle, InitialLength, InitialAngle > 180);
+                    SideAttackingEnemies.Add(attacking);
+                    EnemySwarm.Remove(enemy);
+
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
+    void ControlSideAttack(AttackObject2 enemy)
+    {
+        if (!enemy.FarAway)
+        {
+            if (Vector2.Distance(enemy.enemy.transform.position, transform.position) > enemy.distanceToTravel)
+            {
+                enemy.FarAway = true;
+            }
+            //return null;
+        }
+        else if (!enemy.AngledAtPlayer)
+        {
+
+            if (enemy.CW)
+            {
+                enemy.enemy.transform.rotation = Quaternion.Euler(0, 0, (360 + enemy.enemy.transform.rotation.eulerAngles.z - EnemyTurnAnglePerFrame)%360);
+                Vector2 vectorBetween = enemy.player - (Vector2)enemy.enemy.transform.position;
+                float ang = Vector2ToDegrees(vectorBetween);
+                if (ang >= enemy.enemy.transform.rotation.eulerAngles.z)
+                {
+                    enemy.AngledAtPlayer = true;
+                }
+            }
+            else
+            {
+                enemy.enemy.transform.rotation = Quaternion.Euler(0, 0, (enemy.enemy.transform.rotation.eulerAngles.z + EnemyTurnAnglePerFrame/6) % 360);
+                Vector2 vectorBetween = enemy.player - (Vector2)enemy.enemy.transform.position;
+                float ang = Vector2ToDegrees(vectorBetween);
+                if (ang <= enemy.enemy.transform.rotation.eulerAngles.z)
+                {
+                    enemy.AngledAtPlayer = true;
+                }
+            }
+            enemy.enemy.GetComponent<Rigidbody2D>().velocity = enemy.enemy.transform.up * enemy.enemy.GetComponent<Rigidbody2D>().velocity.magnitude;
+            //return null;
+        }
+        else
+        {
+            if (enemy.closestDistanceToPlayer > Vector2.Distance(enemy.enemy.transform.position, enemy.player))
+            {
+                enemy.closestDistanceToPlayer = Vector2.Distance(enemy.enemy.transform.position, enemy.player);
+                //return null;
+            }
+            else
+            {
+                Vector2 diff = transform.position - enemy.enemy.transform.position;
+                float desiredAng = (Vector2ToDegrees(diff) + 360) % 360, currentZRot = enemy.enemy.transform.rotation.eulerAngles.z;
+                /*float newAng = enemy.CW ? (enemy.enemy.transform.rotation.eulerAngles.z - EnemyTurnAnglePerFrame) % 360 : (enemy.enemy.transform.rotation.eulerAngles.z + EnemyTurnAnglePerFrame + 360) % 360;
+                enemy.enemy.transform.rotation = Quaternion.Euler(0, 0, newAng);
+                enemy.enemy.GetComponent<Rigidbody2D>().velocity = enemy.enemy.transform.up * enemy.enemy.GetComponent<Rigidbody2D>().velocity.magnitude;
+                */
+                enemy.enemy.transform.rotation = Quaternion.Euler(0, 0, ClampAngle(desiredAng, enemy.enemy.transform.rotation.eulerAngles.z, EnemyTurnAnglePerFrame));
+                enemy.enemy.GetComponent<Rigidbody2D>().velocity = enemy.enemy.transform.up * enemy.enemy.GetComponent<Rigidbody2D>().velocity.magnitude;
+
+            }
+        }
+    }
+
+    void ControlChargeAttack(AttackObject enemy)
     {
         float distanceBetweenEnemy = Vector2.Distance(enemy.enemy.transform.position, transform.position);
         Rigidbody2D enemyRB = enemy.enemy.GetComponent<Rigidbody2D>();
@@ -90,7 +202,7 @@ public class SwarmBossInfluence : MonoBehaviour
             if (enemyRB.velocity.magnitude > 4 && !enemy.StartedTurning)
             {
                 enemyRB.velocity = enemy.enemy.GetComponent<Rigidbody2D>().velocity * 0.96f;
-                print("1");
+                //print("1");
             }
             else if (!enemy.TriggerOnceOnly)
             {
@@ -98,7 +210,7 @@ public class SwarmBossInfluence : MonoBehaviour
                 ControlWave(enemy);
                 enemyRB.velocity = enemyRB.velocity.normalized;
                 enemyRB.velocity *= CurrentVelocityMag;
-                print("2");
+                //print("2");
 
             }
             else
@@ -113,18 +225,18 @@ public class SwarmBossInfluence : MonoBehaviour
     }
 
 
-    List<PositionAngleBeforePoint> DeleteNull(List<PositionAngleBeforePoint> MyList)
+    List<AttackObject> DeleteNull(List<AttackObject> MyList)
     {
         
-        List<PositionAngleBeforePoint> NullObjects = new List<PositionAngleBeforePoint>();
-        foreach (PositionAngleBeforePoint object1 in MyList)
+        List<AttackObject> NullObjects = new List<AttackObject>();
+        foreach (AttackObject object1 in MyList)
         {
             if (object1.enemy == (null))
             {
                 NullObjects.Add(object1);
             }
         }
-        foreach (PositionAngleBeforePoint nullObject in NullObjects)
+        foreach (AttackObject nullObject in NullObjects)
         {
             MyList.Remove(nullObject);
         }
@@ -132,6 +244,46 @@ public class SwarmBossInfluence : MonoBehaviour
 
 
     }
+    List<OrbitingEnemy> DeleteNull(List<OrbitingEnemy> MyList)
+    {
+
+        List<OrbitingEnemy> NullObjects = new List<OrbitingEnemy>();
+        foreach (OrbitingEnemy object1 in MyList)
+        {
+            if (object1.enemy == (null))
+            {
+                NullObjects.Add(object1);
+            }
+        }
+        foreach (OrbitingEnemy nullObject in NullObjects)
+        {
+            MyList.Remove(nullObject);
+        }
+        return MyList;
+
+
+    }
+    List<AttackObject2> DeleteNull(List<AttackObject2> MyList)
+    {
+
+        List<AttackObject2> NullObjects = new List<AttackObject2>();
+        foreach (AttackObject2 object1 in MyList)
+        {
+            if (object1.enemy == (null))
+            {
+                NullObjects.Add(object1);
+            }
+        }
+        foreach (AttackObject2 nullObject in NullObjects)
+        {
+            MyList.Remove(nullObject);
+        }
+        return MyList;
+
+
+    }
+
+
     public void SendEnemiesAtPlayer(int NumberOfShips, float MaxSpread)
     {
 
@@ -154,7 +306,7 @@ public class SwarmBossInfluence : MonoBehaviour
 
     //First rotates enemy towards its enemy.angle if the enemy.triggerOnceOnly is false, then if the angle is the desired angle, then starts following the line
     //with the angle enemy.angle through the enemy.endposition
-    void ControlWave(PositionAngleBeforePoint enemy)
+    void ControlWave(AttackObject enemy)
     {
         enemy.StartedTurning = true;
         //If desired angle to achieve is greater than 45 degrees away from current angle, then rotate towards the boss
@@ -247,11 +399,19 @@ public class SwarmBossInfluence : MonoBehaviour
                     return;
                 }
             }
-            foreach (PositionAngleBeforePoint enemy1 in PlayerChargingEnemies)
+            foreach (AttackObject enemy1 in PlayerChargingEnemies)
             {
                 if (enemy1.enemy == other.gameObject)
                 {
                     return;
+                }
+            }
+            foreach (AttackObject2 enemy1 in SideAttackingEnemies)
+            {
+                if (enemy1.enemy == other.gameObject)
+                {
+                    SideAttackingEnemies.Remove(enemy1);
+                    break;
                 }
             }
             EnemySwarm.Add(new OrbitingEnemy(other.gameObject, EnemySpeed));
@@ -336,9 +496,9 @@ public class SwarmBossInfluence : MonoBehaviour
         return (angle1+360)%360;
     }
 
-    //Instantiates a new PositionAngleBeforePoint enemy with the closest Enemy with DesiredAngle + 180, angled at DesiredAngle,
+    //Instantiates a new AttackObject enemy with the closest Enemy with DesiredAngle + 180, angled at DesiredAngle,
     //Going through the boss enemy position, and turning towards the boss when it needs to turn
-    public List<PositionAngleBeforePoint> AddAttackingShip(List<PositionAngleBeforePoint> ListToAddTo, float DesiredAngle)
+    public List<AttackObject> AddAttackingShip(List<AttackObject> ListToAddTo, float DesiredAngle)
     {
         List<GameObject> enemiesInRange = new List<GameObject>();
         foreach (OrbitingEnemy enemy1 in EnemySwarm)
@@ -357,7 +517,7 @@ public class SwarmBossInfluence : MonoBehaviour
                 CW = false;
             }
             else CW = true;
-            ListToAddTo.Add(new PositionAngleBeforePoint(FoundShip, gameObject, (DesiredAngle + 180) % 360, CW));
+            ListToAddTo.Add(new AttackObject(FoundShip, gameObject, (DesiredAngle + 180) % 360, CW));
             foreach (OrbitingEnemy enemy1 in EnemySwarm)
             {
                 if (enemy1.enemy == FoundShip)
@@ -473,27 +633,43 @@ public class SwarmBossInfluence : MonoBehaviour
         }
     }
 }
-public class PositionAngleBeforePoint
+public class AttackObject
 {
     public GameObject enemy;//object that is moving
     public GameObject endPosition;//position to reach
     public float angle;//Angle in Degrees
     public bool CW;//Should ship spin clockwise or counterclockwise first?
     public bool TriggerOnceOnly = false, StartedTurning = false, StartedSlowing = false;
-    public PositionAngleBeforePoint(GameObject enemy, GameObject endPosition, float angle, bool CW)
+    public AttackObject(GameObject enemy, GameObject endPosition, float angle, bool CW)
     {
         this.enemy = enemy;
         this.endPosition = endPosition;
         this.angle = angle;
         this.CW = CW;
     }
-    public PositionAngleBeforePoint(GameObject enemy, float angle)
+    public AttackObject(GameObject enemy, float angle)
     {
         this.enemy = enemy;
         this.angle = angle;
     }
 }
+public class AttackObject2
+{
+    public GameObject enemy;
+    public Vector2 player;
+    public float approachAngle, distanceToTravel;
+    public bool CW, FarAway = false, AngledAtPlayer = false;
+    public float closestDistanceToPlayer = float.MaxValue;
 
+    public AttackObject2(GameObject enemy, Vector2 player, float approachAngle, float distanceToTravel, bool CW)
+    {
+        this.enemy = enemy;
+        this.player = player;
+        this.approachAngle = approachAngle;
+        this.CW = CW;
+        this.distanceToTravel = distanceToTravel;
+    }
+}
 public class OrbitingEnemy
 {
     public GameObject enemy;

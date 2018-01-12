@@ -31,14 +31,17 @@ public class BaseEnemyScript : MonoBehaviour {
         if (health <= 0)
         {
             gameObject.tag = "Dead";
-            string prefabName = PrefabUtility.GetPrefabParent(this).name;//gets name of prefab
-            if (LevelController.levelController.EnemiesKilled.ContainsKey(prefabName))
+            if (PrefabUtility.GetPrefabParent(this) != null)
             {
-                LevelController.levelController.EnemiesKilled[prefabName]++;
-            }
-            else LevelController.levelController.EnemiesKilled.Add(prefabName, 1);
+                string prefabName = PrefabUtility.GetPrefabParent(this).name;//gets name of prefab
+                if (LevelController.levelController.EnemiesKilled.ContainsKey(prefabName))
+                {
+                    LevelController.levelController.EnemiesKilled[prefabName]++;
+                }
+                else LevelController.levelController.EnemiesKilled.Add(prefabName, 1);
 
-            //Debug.Log(LevelController.levelController.EnemiesKilled[prefabName] + prefabName);
+                //Debug.Log(LevelController.levelController.EnemiesKilled[prefabName] + prefabName);
+            }
         }
     }
 

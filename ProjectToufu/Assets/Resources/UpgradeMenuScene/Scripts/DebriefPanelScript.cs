@@ -10,15 +10,16 @@ public class DebriefPanelScript : MonoBehaviour {
     private float SpawnPrefabHereX = 60, SpawnPrefabHereY = -100;
     public float SecondsToWait;
 	// Use this for initialization
-	/*void Start () {//TEST
-        Dictionary<string, int> temp = SaveInfo.saveInfo.SaveObject.EnemiesKilledPrevious;
+	void Start ()
+    {//TEST
+        /*Dictionary<string, int> temp = SaveInfo.saveInfo.SaveObject.EnemiesKilledPrevious;
         temp.Add("Enemy1", 1);
         temp.Add("Enemy2", 1);
         temp.Add("Enemy3", 1);
         temp.Add("Agile Enemy", 1);
         temp.Add("Double Shot Enemy", 1);
-        temp.Add("Multi Shot Enemy", 1);
-	}*/
+        temp.Add("Multi Shot Enemy", 1);*/
+	}
 	
     void OnEnable()
     {
